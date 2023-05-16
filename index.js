@@ -52,7 +52,7 @@ async function getReciptData(txId) {
                 const gasFee = txReceipt.gasUsed * txReceipt.effectiveGasPrice;
                 const contract = new web3.eth.Contract(erc20Abi, address);
                 const tokenObj = await getSmartContractData(contract);
-                console.log("################# TRANSACTION RECEIPT START ####################");
+                console.log("################# TRANSACTION RECEIPT(TOKEN) START ####################");
                 console.log(`Transaction Hash: ${txId}`);
                 console.log(`Transaction From Address: ${fromAddr}`);
                 console.log(`Transaction To Address: ${toAddr}`);
@@ -60,7 +60,7 @@ async function getReciptData(txId) {
                 console.log(`Transaction Token Name: ${tokenObj.tokenName}`);
                 console.log(`Transaction Token Value: ${tokenValue / 10 ** tokenObj.tokenDecimal}`);
                 console.log(`Transaction Gas Fee: ${web3.utils.fromWei(gasFee.toString(), "ether")} ETH`);
-                console.log("################### TRANSACTION RECEIPT FINISH #################");
+                console.log("################### TRANSACTION RECEIPT(TOKEN) FINISH #################");
             }
         });
     }
@@ -69,16 +69,16 @@ async function getReciptData(txId) {
 
 async function getSmartContractData(contract) {
     class tokenData {
-        constructor(tokenName, tokenDecimal) {
+        constructor(tokenName, tokenDecimal, tokenSymbol) {
             this.tokenName = tokenName;
             this.tokenDecimal = tokenDecimal;
+            this.tokenSymbol = tokenSymbol;
         }
     }
     const tokenName = await contract.methods.name().call();
     const tokenDecimal = await contract.methods.decimals().call();
-
+    //const tokenSymbol = await contract.methods.symbol().call();
     const tokenObj = new tokenData(tokenName, tokenDecimal);
-
     return tokenObj;
 }   
 

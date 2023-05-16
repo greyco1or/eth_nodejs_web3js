@@ -49,20 +49,28 @@ async function getReciptData(txId) {
 
 async function getSmartContractData(contract) {
     class tokenData {
-        constructor(tokenName, tokenDecimal) {
+        constructor(tokenName, tokenDecimal, tokenSymbol) {
             this.tokenName = tokenName;
             this.tokenDecimal = tokenDecimal;
+            this.tokenSymbol = tokenSymbol;
         }
     }
     const tokenName = await contract.methods.name().call();
     const tokenDecimal = await contract.methods.decimals().call();
+    const tokenSymbol = await contract.methods.symbol().call();
 
     const tokenObj = new tokenData(tokenName, tokenDecimal);
 
     return tokenObj;
 }   
 
-Subscribe();
+const contract = new web3.eth.Contract(erc20Abi, "0x2B9a49417F9c9c8Dd18EF5bb37c20637441Ad67a");
+const tokenObj = await getSmartContractData(contract);
+console.log(tokenObj.tokenSymbol);
+console.log(tokenObj.tokenName);
+console.log(tokenObj.tokenDecimal);
+
+//Subscribe();
 
 /*
 const contract = new web3.eth.Contract(erc20Abi, "0x51Ee7bB106B581f7cdDab5fA1e9B8A4F4eBca565");
