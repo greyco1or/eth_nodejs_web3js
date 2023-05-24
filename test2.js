@@ -1,16 +1,25 @@
 import Web3 from "web3";
-import erc20Abi from "./erc20.abi.json" assert { type: "json" };
+//import erc20Abi from "./erc20.abi.json" assert { type: "json" };
 
 const web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws/v3/246a412f52f74832b07b645d3c9b9fed"));
-//const web3 = new Web3(new Web3.providers.HttpProvider("https://sepolia.infura.io/v3/246a412f52f74832b07b645d3c9b9fed"));
+//const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/246a412f52f74832b07b645d3c9b9fed"));
 //const web3 = new Web3('https://mainnet.bitonechain.com/');
 
 function Subscribe() {
+    let txId = "";
     web3.eth.subscribe('logs', {}, (err, result) => {
+        console.log(result);
         if(err) {
             console.error(err);
         } else {
-            let txId = result.transactionHash;
+            if(txId == result.transactionHash) {
+                return;
+            } else {
+                txId = result.transactionHash;
+                //console.log(txId);
+                //getReciptData(txId);
+                //client.close();
+            }
             /*
             console.log("########################## Transaction Log Info Start ########################")
             console.log(`Block Number: ${result.blockNumber}`);
@@ -19,18 +28,26 @@ function Subscribe() {
             console.log(`Transaction Index: ${result.transactionIndex}`);
             console.log("########################## Transaction Log Info Finish ########################");
             */
-           getReciptData(txId);
+           //getReciptData();
         }
     })
     .on("connected", function(subscriptionId) {
         console.log(`Web Socket Connected! SubscriptionId: ${subscriptionId}`)
     })
 }
+//Subscribe();
 
-async function getReciptData(txId) {
+async function getReciptData() {
+    const txId = "0x64ed4d9781a0743c4b5734ba9f42ab0074ba7d1659e79b84d4b85a67a995733b";
     const tx = await web3.eth.getTransaction(txId);
-    const { input } = tx;
-    if (input == undefined || input == "0x") {
+    const txReceipt = await web3.eth.getTransactionReceipt(txId);
+    console.log(tx);
+    console.log("**********************************************");
+    console.log(txReceipt.logs);
+    //const tx = await web3.eth.getTransaction(txId);
+    //const { input } = tx;
+    //if (input == undefined || input == "0x") {
+        /*
         const fromAddr = tx.from;
         const toAddr = tx.to;
         const gasFee = txReceipt.gasUsed * txReceipt.effectiveGasPrice;
@@ -43,10 +60,14 @@ async function getReciptData(txId) {
         console.log(`Transaction Coin Value: ${coinValue} ETH`);
         console.log(`Transaction Gas Fee: ${web3.utils.fromWei(gasFee.toString(), "ether")} ETH`);
         console.log("@@@@@@@@@@@@@@@@@ TRANSACTION ETH TRANSFER FINISH @@@@@@@@@@@@@@@@@");
-    }
+        */
+    //}
     
 }
 
+getReciptData();
+
+/*
 async function getSmartContractData(contract) {
     class tokenData {
         constructor(tokenName, tokenDecimal, tokenSymbol) {
@@ -69,8 +90,6 @@ const tokenObj = await getSmartContractData(contract);
 console.log(tokenObj.tokenSymbol);
 console.log(tokenObj.tokenName);
 console.log(tokenObj.tokenDecimal);
-
-//Subscribe();
 
 /*
 const contract = new web3.eth.Contract(erc20Abi, "0x51Ee7bB106B581f7cdDab5fA1e9B8A4F4eBca565");
