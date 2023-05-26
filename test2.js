@@ -5,10 +5,36 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura
 //const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/246a412f52f74832b07b645d3c9b9fed"));
 //const web3 = new Web3('https://mainnet.bitonechain.com/');
 
-function Subscribe() {
+async function getTimeStamp() {
+    let timeStamp = "";
+    let subscription = web3.eth.subscribe('newBlockHeaders', function (err, result) {
+        if(err) {
+            console.error(err);
+        } else {                                                  
+            //console.log(`BLOCK TIMESTAMP : ${result.timestamp}, ${new Date()}`);
+            let timeStampToDate = new Date(result.timestamp * 1000);
+            timeStamp = timeStampToDate.getFullYear() + "-" + (timeStampToDate.getMonth()+1) + "-" + timeStampToDate.getDate() + " " + timeStampToDate.getHours() + ":" + timeStampToDate.getMinutes() + ":" + timeStampToDate.getSeconds();
+            console.log(`BLOCK TIMESTAMP : ${timeStamp}, ${new Date()}`);
+            //timeStamp = result.timestamp;
+        }
+    }).on("data", function(blockHeader) {
+        subscription.unsubscribe(function(err, success) {
+            if(success) {
+                console.log("Successfully unsubscribed!");
+                Subscribe(timeStamp);
+            }
+        })
+    })
+    return new Promise((resolve) => {
+        timeStamp;
+    });
+}
+
+async function Subscribe(timeStamp) {
     let txId = "";
-    web3.eth.subscribe('logs', {}, (err, result) => {
-        console.log(result);
+    //let timeStamp = "";
+    //timeStamp = getTimeStamp();
+    let logSubscription = web3.eth.subscribe('logs', {}, (err, result) => {
         if(err) {
             console.error(err);
         } else {
@@ -16,9 +42,11 @@ function Subscribe() {
                 return;
             } else {
                 txId = result.transactionHash;
+                console.log(`TRANSACTION HASH : ${txId}, ${timeStamp}`);
+                //let timeStamp = getTimeStamp();
                 //console.log(txId);
-                //getReciptData(txId);
                 //client.close();
+                //getReciptData(txId);
             }
             /*
             console.log("########################## Transaction Log Info Start ########################")
@@ -34,8 +62,18 @@ function Subscribe() {
     .on("connected", function(subscriptionId) {
         console.log(`Web Socket Connected! SubscriptionId: ${subscriptionId}`)
     })
+    .on("data", function(log){
+        console.log(logSubscription);
+        logSubscription.unsubscribe(function(error, success){
+            if(success) {
+                getTimeStamp();
+            }
+        });
+    })
+    return new Promise((res) => 1);
 }
-//Subscribe();
+
+getTimeStamp();
 
 async function getReciptData() {
     const txId = "0x64ed4d9781a0743c4b5734ba9f42ab0074ba7d1659e79b84d4b85a67a995733b";
@@ -64,8 +102,6 @@ async function getReciptData() {
     //}
     
 }
-
-getReciptData();
 
 /*
 async function getSmartContractData(contract) {
